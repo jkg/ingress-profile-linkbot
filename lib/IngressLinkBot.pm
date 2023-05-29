@@ -61,7 +61,7 @@ sub _dispatch {
             return $update->reply( $self->_profile_link( $1 ) );
         }
 
-        if ( $message =~ m|^/start$| or $message =~ m|^/help$| ) {
+        if ( $message =~ m|^/start$|i or $message =~ m|^/help$|i ) {
             return $update->reply( "Send me /profile and an agent name, and I'll do my best...");
         }
     } else { 
@@ -69,7 +69,7 @@ sub _dispatch {
         # are there any of these?
     }
 
-    if ( $message =~ m|^/profile\s+(${ign_pattern})\s*| ) {
+    if ( $message =~ m|^/profile\s+(${ign_pattern})\s*|i ) {
         return $update->reply( $self->_profile_link( $1 ) );
     }
 
