@@ -60,6 +60,10 @@ sub _dispatch {
         if ( $message =~ m|^\s*(${ign_pattern})\s*$| ) {
             return $update->reply( $self->_profile_link( $1 ) );
         }
+
+        if ( $message =~ m|^/start$| or $message =~ m|^/help$| ) {
+            return $update->reply( "Send me /profile and an agent name, and I'll do my best...");
+        }
     } else { 
         # group-exclusive behaviours
         # are there any of these?
