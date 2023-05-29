@@ -73,15 +73,15 @@ sub _dispatch {
         return $update->reply( $self->_profile_link( $1 ) );
     }
 
-    if ( $message =~ m|^/ada$| ) {
+    if ( $message =~ m|^/ada$|i ) {
         return $update->reply( $self->_profile_link( '__ADA__' ) );
     }
     
-    if ( $message =~ m|^/jarvis$| ) {
+    if ( $message =~ m|^/jarvis$|i ) {
         return $update->reply( $self->_profile_link( '__JARVIS__' ) );
     }
     
-    if ( $message =~ m|^/machina$| ) {
+    if ( $message =~ m|^/machina$|i ) {
         return $update->reply( $self->_profile_link( '__MACHINA__' ) );
     }
 
