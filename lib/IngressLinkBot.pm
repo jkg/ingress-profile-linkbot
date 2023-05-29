@@ -50,7 +50,7 @@ sub _dispatch {
     my $message = $update->text;
 
     unless ( defined $message ) {
-        return $update->reply("I don't know what you're expecting to happen, here...");
+        return;
     }
 
     my $ign_pattern = qr|([A-Za-z0-9_]{1,15})|;
