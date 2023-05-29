@@ -49,8 +49,6 @@ sub _dispatch {
     my $update = shift;
     my $message = $update->text;
 
-    use DDP; p $message;
-
     unless ( defined $message ) {
         return $update->reply("I don't know what you're expecting to happen, here...");
     }

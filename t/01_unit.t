@@ -29,36 +29,40 @@ subtest 'dispatching' => sub {
     my $profile_link_called = 0;
     $mock_bot->override(
         _profile_link => sub {
+            shift;
             ++$profile_link_called;
-            return "looks good";
-        },
+            return "Agent " . uc(shift);
+        }
     );
 
     my $bot = $CLASS->new( token => 'token' );
 
-    subtest 'text cases' => sub {
+    subtest 'pm behaviour' => sub {
 
-        my $msg = _new_msg( text => 'too many words' );
-        like $bot->_dispatch( $msg ), qr/look like an agent name/, "Encourage user to try again on bad text";
+        my $msg = _new_msg( text => 'Dittosaur', chat => _new_private_chat() );
 
-        $msg = _new_msg( text => '' );
-        like $bot->_dispatch( $msg ), qr/look like an agent name/, "... and also on blank message";
-
-        $msg = _new_msg( text => '🍟');
-        like $bot->_dispatch( $msg ), qr/look like an agent name/, "... and also with unexpected characters";
-
-        $msg = _new_msg( text => 'é');
-        like $bot->_dispatch( $msg ), qr/look like an agent name/, "... and also with unpermitted characters";
-
-        is $profile_link_called, 0, "... and none of these cases called _profile_link";
-
-        $msg = _new_msg( text => 'Dittosaur' );
-        like $bot->_dispatch( $msg ), qr/looks good/, "But an IGN works fine";
+        like $bot->_dispatch( $msg ), qr/^Agent DITTOSAUR/, "Bare IGN works fine in PM";
         is $profile_link_called, 1, "...and we called the actual method";
 
-        $msg = _new_msg( text => '  Dittosaur     ' );
-        like $bot->_dispatch( $msg ), qr/looks good/, "...and extra whitespace is permitted";
-        is $profile_link_called, 2, "...and we called the actual method again";
+        $msg->text( '/ada' );
+        like $bot->_dispatch( $msg ), qr/^Agent __ADA__/, "And the NPC commands work";
+        is $profile_link_called, 2, "...and we still call the method";
+
+        $profile_link_called = 0; # reset
+
+    };
+
+    subtest 'group behaviour' => sub {
+
+        my $msg = _new_msg( text => 'Dittosaur', chat => _new_group_chat() );
+        my $reply = $bot->_dispatch( $msg );
+        ok !defined $reply, "No response without a command, in group";
+
+        $msg->text( '/jarvis' );
+        like $bot->_dispatch( $msg ), qr/^Agent __JARVIS__/, "And the NPC commands work in groups";
+
+        $msg->text( '/profile firstname surname' );
+        like $bot->_dispatch( $msg ), qr/^Agent FIRSTNAME$/, "Profile command works correctly, ignores extra words";
 
     };
 
@@ -72,7 +76,7 @@ subtest 'profile link' => sub {
     like $bot->_profile_link(''), qr/understand what just/,
         "Bot is appropriately confused by impossible blank IGN";
 
-    like $bot->_profile_link('Dittosaur'), qr|referring to agent|,
+    like $bot->_profile_link('Dittosaur'), qr|^Agent DITTO.+2FDittosaur$|,
         "... and generates a sane URL otherwise";
 
 };
@@ -92,3 +96,10 @@ sub _user_from_tgid {
     return Telegram::Bot::Object::User->new( id => $telegram_id );
 }
 
+sub _new_private_chat {
+    return Telegram::Bot::Object::Chat->new( type => 'private', @_ );
+}
+
+sub _new_group_chat {
+    return Telegram::Bot::Object::Chat->new( type => 'group', @_ );
+}
