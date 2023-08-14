@@ -1,5 +1,5 @@
 requires 'Config::JSON';
-requires 'Telegram::Bot' => '0.021';
+requires 'Telegram::Bot' => '0.023';
 requires 'Try::Tiny';
 requires 'URI::Encode';
 
