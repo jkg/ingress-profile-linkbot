@@ -1,5 +1,5 @@
 package IngressLinkBot;
-use Mojo::Base 'IngressLinkBot::SafeBrain';
+use Mojo::Base 'Telegram::Bot::Brain';
 use URI::Encode qw|uri_encode|;
 
 use Try::Tiny;
