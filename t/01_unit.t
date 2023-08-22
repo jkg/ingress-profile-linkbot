@@ -48,6 +48,10 @@ subtest 'dispatching' => sub {
         like $bot->_dispatch( $msg ), qr/^Agent __ADA__/, "And the NPC commands work";
         is $profile_link_called, 2, "...and we still call the method";
 
+        $msg->text( '@Dittosaur' );
+        like $bot->_dispatch( $msg ), qr/^Agent DITTO/, "IGN with the @ also works";
+        is $profile_link_called, 3, "...and we call the method even when there's an @, now";
+
         $profile_link_called = 0; # reset
 
     };
