@@ -57,7 +57,7 @@ sub _dispatch {
 
     if ( $update->chat->type eq 'private' ) {
         # PM-exclusive behaviours
-        if ( $message =~ m|^\s*\@?(${ign_pattern})\s*$| ) {
+        if ( $message =~ m|^\s*\@?(${ign_pattern})\s*| ) {
             return $update->reply( $self->_profile_link( $1 ) );
         }
 
