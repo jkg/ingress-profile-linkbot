@@ -47,18 +47,58 @@ methods below for handling.
 sub _dispatch {
     my $self = shift;
     my $update = shift;
-    my $message = $update->text;
 
-    unless ( defined $message ) {
-        return;
+    return unless defined $update;
+
+
+
+    my $ign_pattern = qr|([A-Za-z0-9]{1,15})|;
+
+    # handle the inline messages
+
+    if ( $update->isa('Telegram::Bot::Object::InlineQuery') ) {
+
+        my $q = $update->query;
+
+        return unless $q =~ m|^\s*(${ign_pattern})\s*$|;
+
+        my $url = $self->_profile_link( $1 );
+        my $agent = uc($1);
+
+        my $response = {
+            type => 'article',
+            id => $agent,
+            title => "Agent $agent",
+            url => $url,
+            hide_url => Mojo::JSON->true,
+            input_message_content => {
+                    message_text => "[Agent $agent]($url)",
+                    parse_mode => "MarkdownV2",
+                    link_preview_options => {
+                        is_disabled => Mojo::JSON->true,
+                    },
+            },
+        };
+
+        return $update->reply(
+            [ $response ],
+            {
+                cache_time => 86400,
+            }
+        );
     }
 
-    my $ign_pattern = qr|([A-Za-z0-9_]{1,15})|;
+    # otherwise it's a regular chat message
+    return unless
+        $update->isa('Telegram::Bot::Object::Message');
+
+    my $message = $update->text;
 
     if ( $update->chat->type eq 'private' ) {
         # PM-exclusive behaviours
+
         if ( $message =~ m|^\s*\@?(${ign_pattern})\s*| ) {
-            return $update->reply( $self->_profile_link( $1 ) );
+            return $update->reply( "Agent " . uc($1) . ": " . $self->_profile_link( $1 ) );
         }
 
         if ( $message =~ m|^/start$|i or $message =~ m|^/help$|i ) {
@@ -70,19 +110,19 @@ sub _dispatch {
     }
 
     if ( $message =~ m|^/profile\s+\@?(${ign_pattern})\s*|i ) {
-        return $update->reply( $self->_profile_link( $1 ) );
+        return $update->reply( "Agent " . uc($1) . ": " . $self->_profile_link( $1 ) );
     }
 
     if ( $message =~ m|^/ada$|i ) {
-        return $update->reply( $self->_profile_link( '__ADA__' ) );
+        return $update->reply( "ADA:" . $self->_profile_link( '__ADA__' ) );
     }
     
     if ( $message =~ m|^/jarvis$|i ) {
-        return $update->reply( $self->_profile_link( '__JARVIS__' ) );
+        return $update->reply( "Jarvis: " . $self->_profile_link( '__JARVIS__' ) );
     }
     
     if ( $message =~ m|^/machina$|i ) {
-        return $update->reply( $self->_profile_link( '__MACHINA__' ) );
+        return $update->reply( "Machina: " . $self->_profile_link( '__MACHINA__' ) );
     }
 
     return;
@@ -99,11 +139,8 @@ sub _profile_link {
     my $self = shift;
     my $name = shift;
     if ( $name ) {
-        return "Agent " . uc($name) . ": "
-            . "https://link.ingress.com/?link="
+        return "https://link.ingress.com/?link="
             . uri_encode ( "https://intel.ingress.com/agent/$name", encode_reserved => 1 );
-    } else {
-        return "I don't really understand what just happened, sorry";
     }
 }
 
