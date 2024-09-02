@@ -72,7 +72,7 @@ sub _dispatch {
             url => $url,
             hide_url => Mojo::JSON->true,
             input_message_content => {
-                    message_text => "[Agent $agent]($url)",
+                    message_text => "Agent [$agent]($url)",
                     parse_mode => "MarkdownV2",
                     link_preview_options => {
                         is_disabled => Mojo::JSON->true,
@@ -98,7 +98,10 @@ sub _dispatch {
         # PM-exclusive behaviours
 
         if ( $message =~ m|^\s*\@?(${ign_pattern})\s*| ) {
-            return $update->reply( "Agent " . uc($1) . ": " . $self->_profile_link( $1 ) );
+            return $update->reply(
+                "Agent " . $self->_profile_link( $1, 'MarkdownV2' ),
+                { parse_mode => 'MarkdownV2' }
+            );
         }
 
         if ( $message =~ m|^/start$|i or $message =~ m|^/help$|i ) {
@@ -110,7 +113,8 @@ sub _dispatch {
     }
 
     if ( $message =~ m|^/profile\s+\@?(${ign_pattern})\s*|i ) {
-        return $update->reply( "Agent " . uc($1) . ": " . $self->_profile_link( $1 ) );
+        return $update->reply( "Agent " . $self->_profile_link( $1, 'MarkdownV2' ),
+            { parse_mode => 'MarkdownV2' } );
     }
 
     if ( $message =~ m|^/ada$|i ) {
@@ -137,11 +141,20 @@ If it looks like an IGN, we process it here and reply.
 
 sub _profile_link {
     my $self = shift;
-    my $name = shift;
-    if ( $name ) {
-        return "https://link.ingress.com/?link="
-            . uri_encode ( "https://intel.ingress.com/agent/$name", encode_reserved => 1 );
+    my $agent = uc shift;
+    my $markdown_mode = shift // 0;
+
+    return unless $agent;
+
+    my $url = "https://link.ingress.com/?link="
+            . uri_encode ( "https://intel.ingress.com/agent/$agent", encode_reserved => 1 );
+
+    if ( $markdown_mode ) {
+        return "[$agent]($url)";
+    } else {
+        return $url;
     }
+
 }
 
 =head2 _easter_eggs
