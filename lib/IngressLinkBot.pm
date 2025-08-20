@@ -146,8 +146,7 @@ sub _profile_link {
 
     return unless $agent;
 
-    my $url = "https://link.ingress.com/?link="
-            . uri_encode ( "https://intel.ingress.com/agent/$agent", encode_reserved => 1 );
+    my $url = "https://link.ingress.com/agent/$agent";
 
     if ( $markdown_mode ) {
         return "[$agent]($url)";
