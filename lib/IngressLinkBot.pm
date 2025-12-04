@@ -61,7 +61,7 @@ sub _dispatch {
         my $q = $update->query;
 
         my $ign;
-        if ( $q =~ m{^\s*(ADA|JARVIS|MACHINA)\s*$} ) {
+        if ( $q =~ m{^\s*(ADA|JARVIS|MACHINA)\s*$}i ) {
             $ign = "__" . $1 . "__";
         } elsif ( $q =~ m|^\s*(${ign_pattern})\s*$| ) {
             $ign = $1;
