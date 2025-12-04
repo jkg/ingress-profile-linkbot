@@ -126,7 +126,7 @@ sub _dispatch {
 
     if ( $message =~ m{^/(ada|jarvis|machina)\b}i ) {
         my $tmp = uc $1;
-        return $update->reply( $tmp . ": " . $self->_profile_link( "__" . $tmp . "__", 1 ),
+        return $update->reply( $self->_profile_link( "__" . $tmp . "__", 1 ),
             { parse_mode => 'MarkdownV2' } );
     }
 
