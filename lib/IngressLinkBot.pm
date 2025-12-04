@@ -60,10 +60,17 @@ sub _dispatch {
 
         my $q = $update->query;
 
-        return unless $q =~ m|^\s*(${ign_pattern})\s*$|;
+        my $ign;
+        if ( $q =~ m{^\s*(ADA|JARVIS|MACHINA)\s*$} ) {
+            $ign = "__" . $1 . "__";
+        } elsif ( $q =~ m|^\s*(${ign_pattern})\s*$| ) {
+            $ign = $1;
+        } else {
+            return;
+        }
 
-        my $url = $self->_profile_link( $1 );
-        my $agent = uc($1);
+        my $url = $self->_profile_link( $ign );
+        my $agent = uc($ign);
 
         my $response = {
             type => 'article',
