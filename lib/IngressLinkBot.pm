@@ -120,20 +120,14 @@ sub _dispatch {
     }
 
     if ( $message =~ m|^/profile\s+\@?(${ign_pattern})\s*|i ) {
-        return $update->reply( "Agent " . $self->_profile_link( $1, 'MarkdownV2' ),
+        return $update->reply( "Agent " . $self->_profile_link( $1, 1 ),
             { parse_mode => 'MarkdownV2' } );
     }
 
-    if ( $message =~ m|^/ada$|i ) {
-        return $update->reply( "ADA:" . $self->_profile_link( '__ADA__' ) );
-    }
-    
-    if ( $message =~ m|^/jarvis$|i ) {
-        return $update->reply( "Jarvis: " . $self->_profile_link( '__JARVIS__' ) );
-    }
-    
-    if ( $message =~ m|^/machina$|i ) {
-        return $update->reply( "Machina: " . $self->_profile_link( '__MACHINA__' ) );
+    if ( $message =~ m{^/(ada|jarvis|machina)\b}i ) {
+        my $tmp = uc $1;
+        return $update->reply( $tmp . ": " . $self->_profile_link( "__" . $tmp . "__", 1 ),
+            { parse_mode => 'MarkdownV2' } );
     }
 
     return;
